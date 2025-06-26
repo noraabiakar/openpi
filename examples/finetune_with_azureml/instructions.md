@@ -20,4 +20,4 @@ az ml job create --file examples/finetune_with_azureml/train.yaml \
 --set outputs.ASSETS_BASE.path="azureml://datastores/nora_datasets/paths/" \
 --set outputs.HF_LEROBOT_HOME.path="azureml://datastores/nora_datasets/paths/pi0_fast_custom/" \
 --set outputs.MODEL_CHECKPOINTS.path="azureml://datastores/nora_datasets/paths/finetuned_model/" \
---set inputs.extra_flags="--data.repo_id noraabk/dummy"
+--set inputs.extra_flags="--data.repo_id noraabk/dummy --data.wrist_image_key='observation.images.front' --data.secondary_image_key='observation.images.side' --overwrite"
