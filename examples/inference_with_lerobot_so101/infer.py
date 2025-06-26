@@ -27,6 +27,7 @@ class RecordConfig:
     secondary_image_key: str
     total_inference_steps: int = 1000
 
+
 @parser.wrap()
 def main(cfg: RecordConfig):
     # Pi0 FAST
@@ -50,46 +51,46 @@ def main(cfg: RecordConfig):
 
     # Prepare features that match the original lerobot dataset.
     dataset_features = {
-        'action': {
-            'dtype': 'float32', 
-            'shape': (6,), 
-            'names': [
-                'shoulder_pan.pos', 
-                'shoulder_lift.pos', 
-                'elbow_flex.pos', 
-                'wrist_flex.pos', 
-                'wrist_roll.pos', 
-                'gripper.pos',
+        "action": {
+            "dtype": "float32",
+            "shape": (6,),
+            "names": [
+                "shoulder_pan.pos",
+                "shoulder_lift.pos",
+                "elbow_flex.pos",
+                "wrist_flex.pos",
+                "wrist_roll.pos",
+                "gripper.pos",
             ],
-        }, 
-        'observation.state': {
-            'dtype': 'float32', 
-            'shape': (6,), 
-            'names': [
-                'shoulder_pan.pos', 
-                'shoulder_lift.pos', 
-                'elbow_flex.pos', 
-                'wrist_flex.pos', 
-                'wrist_roll.pos', 
-                'gripper.pos',
+        },
+        "observation.state": {
+            "dtype": "float32",
+            "shape": (6,),
+            "names": [
+                "shoulder_pan.pos",
+                "shoulder_lift.pos",
+                "elbow_flex.pos",
+                "wrist_flex.pos",
+                "wrist_roll.pos",
+                "gripper.pos",
             ],
-        }, 
-        'observation.images.front': {
-            'dtype': 'video', 
-            'shape': (480, 640, 3), 
-            'names': [
-                'height',
-                'width',
-                'channels',
+        },
+        cfg.wrist_image_key: {
+            "dtype": "video",
+            "shape": (480, 640, 3),
+            "names": [
+                "height",
+                "width",
+                "channels",
             ],
-        }, 
-        'observation.images.side': {
-            'dtype': 'video',
-            'shape': (480, 640, 3),
-            'names': [
-                'height',
-                'width',
-                'channels',
+        },
+        cfg.secondary_image_key: {
+            "dtype": "video",
+            "shape": (480, 640, 3),
+            "names": [
+                "height",
+                "width",
+                "channels",
             ],
         },
     }
@@ -99,16 +100,16 @@ def main(cfg: RecordConfig):
         # Get the robot obervation and state
         observation = robot.get_observation()
         observation_frame = build_dataset_frame(dataset_features, observation, prefix="observation")
-        
+
         # Rename the keys to match the expected input of the policy
         renamings = {
             "observation/image": "observation.images.side",
-            "observation/wrist_image": "observation.images.front",
-            "observation/state": "observation.state",
+            "observation/wrist_image": cfg.wrist_image_key,
+            "observation/state": cfg.secondary_image_key,
             "prompt": "prompt",
         }
         observation_frame["prompt"] = cfg.prompt
-        observation_frame = {k: observation_frame[v] for k,v in renamings.items()}
+        observation_frame = {k: observation_frame[v] for k, v in renamings.items()}
 
         if not action_queue:
             print(f"Run inference for step {i}")
@@ -117,15 +118,16 @@ def main(cfg: RecordConfig):
             # Fill the queue with all actions in the batch
             for av in action_values:
                 action_queue.append({key: av[i] for i, key in enumerate(robot.action_features)})
-        
+
         # Pop the next action from the queue
         action = action_queue.pop(0)
         print(f"ACTION {i}: {action}")
 
         robot.send_action(action)
-    
+
     print("Done")
     return
+
 
 if __name__ == "__main__":
     main()
