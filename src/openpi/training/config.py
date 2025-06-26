@@ -329,6 +329,8 @@ class LeRobotV2DataConfig(DataConfigFactory):
     """
 
     action_sequence_keys: Sequence[str] = ("action",)
+    wrist_image_key: str = "observation.images.front"
+    secondary_image_key: str = "observation.images.side"
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -336,8 +338,8 @@ class LeRobotV2DataConfig(DataConfigFactory):
             inputs=[
                 _transforms.RepackTransform(
                     {
-                        "observation/image": "observation.images.front",
-                        "observation/wrist_image": "observation.images.side",
+                        "observation/image": self.secondary_image_key,
+                        "observation/wrist_image": self.wrist_image_key,
                         "observation/state": "observation.state",
                         "actions": "action",
                         "prompt": "prompt",
@@ -518,6 +520,16 @@ _CONFIGS = [
                 prompt_from_task=True,
             ),
         ),
+    ),
+    # Fine-tuning lerobot configs.
+    TrainConfig(
+        name="pi0_fast_custom",
+        model=pi0_fast.Pi0FASTConfig(action_dim=7, action_horizon=10, max_token_len=180),
+        data=LeRobotV2DataConfig(
+            base_config=DataConfig(prompt_from_task=True),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_fast_base/params"),
+        num_train_steps=30_000,
     ),
     #
     # Fine-tuning Libero configs.

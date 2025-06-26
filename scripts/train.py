@@ -2,7 +2,6 @@ from contextlib import contextmanager, nullcontext
 import dataclasses
 import functools
 import logging
-import os
 import platform
 from typing import Any
 
@@ -13,7 +12,6 @@ import flax.traverse_util as traverse_util
 import jax
 import jax.experimental
 import jax.numpy as jnp
-from openpi.models import pi0_fast
 import optax
 import tqdm_loggable.auto as tqdm
 import wandb
@@ -29,9 +27,6 @@ import openpi.training.optimizer as _optimizer
 import openpi.training.sharding as sharding
 import openpi.training.utils as training_utils
 import openpi.training.weight_loaders as _weight_loaders
-
-from azure.identity import ManagedIdentityCredential
-from azure.keyvault.secrets import SecretClient
 
 
 def init_logging():
@@ -318,23 +313,4 @@ def main(config: _config.TrainConfig):
 
 
 if __name__ == "__main__":
-    # Read the HF-TOKEN from keyvault and set as env var
-    # credential = ManagedIdentityCredential(client_id=os.environ.get("DEFAULT_IDENTITY_CLIENT_ID"))
-    # client = SecretClient(vault_url=os.environ["KV_URI"], credential=credential)
-    # retrieved_secret = client.get_secret("HF-TOKEN")
-    # os.environ["HF_TOKEN"] = retrieved_secret.value
-
-    # Add new training configuration
-    custom_config = _config.TrainConfig(
-        name="pi0_fast_custom",
-        model=pi0_fast.Pi0FASTConfig(action_dim=7, action_horizon=10, max_token_len=180),
-        data=_config.LeRobotV2DataConfig(
-            repo_id="noraabk/so101-goat-picking-v1",
-            base_config=_config.DataConfig(prompt_from_task=True),
-        ),
-        weight_loader=_weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_fast_base/params"),
-        num_train_steps=30_000,
-    )
-    _config._CONFIGS.append(custom_config)  # noqa: SLF001
-    _config._CONFIGS_DICT["pi0_fast_custom"] = custom_config  # noqa: SLF001
     main(_config.cli())

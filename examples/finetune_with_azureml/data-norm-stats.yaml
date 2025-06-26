@@ -3,15 +3,19 @@ command:
  GIT_LFS_SKIP_SMUDGE=1 uv pip install -e . && 
  uv run scripts/compute_norm_stats.py
  --config-name pi0_fast_custom
- --output-path-str ${{outputs.ASSETS_BASE}}
+ --lerobot_repo_id ${{inputs.repo_id}}
+ --wrist_image_key ${{inputs.wrist_image_key}}
+ --secondary_image_key ${{inputs.secondary_image_key}}
+ --output-path-str ${{outputs.HF_LEROBOT_HOME}}
 environment: azureml:<env_name>:<env_version>
+inputs:
+  repo_id: <repo_id>
+  wrist_image_key: observation.images.side
+  secondary_image_key: observation.images.front
 outputs:
-  ASSETS_BASE:
-    type: uri_folder
-    path: azureml://datastores/<ds_name>/paths/pi0_fast_libero/physical-intelligence/libero/
   HF_LEROBOT_HOME:
     type: uri_folder
-    path: azureml://datastores/<ds_name>/paths/pi0_fast_libero/
+    path: azureml://datastores/<ds_name>/paths/pi0_fast_custom
 environment_variables:
   HF_LEROBOT_HOME: ${{outputs.HF_LEROBOT_HOME}}
 display_name: pi0_compute_norm_stats
