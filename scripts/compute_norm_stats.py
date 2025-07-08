@@ -5,6 +5,8 @@ will compute the mean and standard deviation of the data in the dataset and save
 to the config assets directory.
 """
 
+import dataclasses
+from pathlib import Path
 import numpy as np
 import tqdm
 import tyro
@@ -84,8 +86,27 @@ def create_rlds_dataloader(
     return data_loader, num_batches
 
 
-def main(config_name: str, max_frames: int | None = None):
-    config = _config.get_config(config_name)
+def main(
+    config_name: str,
+    lerobot_repo_id: str,
+    wrist_image_key: str,
+    secondary_image_key: str,
+    max_frames: int | None = None,
+    output_path_str: str | None = None,
+):
+    base_config = _config.get_config(config_name)
+
+    # Modify the lerobot_repo_id and image keys by creating a new config
+    base_data_config = base_config.data
+    data_config = dataclasses.replace(
+        base_data_config,
+        repo_id=lerobot_repo_id,
+        wrist_image_key=wrist_image_key,
+        secondary_image_key=secondary_image_key,
+    )
+    config = dataclasses.replace(base_config, data=data_config)
+
+    # Create the dataset
     data_config = config.data.create(config.assets_dirs, config.model)
 
     if data_config.rlds_data_dir is not None:
@@ -107,7 +128,11 @@ def main(config_name: str, max_frames: int | None = None):
 
     norm_stats = {key: stats.get_statistics() for key, stats in stats.items()}
 
-    output_path = config.assets_dirs / data_config.repo_id
+    output_path = (
+        config.assets_dirs / data_config.repo_id
+        if output_path_str is None
+        else Path(output_path_str) / data_config.repo_id
+    )
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

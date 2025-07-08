@@ -37,6 +37,9 @@ dependencies = [
     "transformers==4.48.1",
     "rich>=14.0.0",
     "polars>=1.30.0",
+    "mlflow>=2.22.1",
+    "azureml-mlflow==1.60.0.post1",
+    "feetech-servo-sdk>=1.0.0",
 ]
 
 
@@ -64,7 +67,7 @@ override-dependencies = ["ml-dtypes==0.4.1", "tensorstore==0.1.74"]
 
 [tool.uv.sources]
 openpi-client = { workspace = true }
-lerobot = { git = "https://github.com/huggingface/lerobot", rev = "0cf864870cf29f4738d3ade893e6fd13fbd7cdb5" }
+lerobot = { git = "https://github.com/huggingface/lerobot", rev = "0b2285d1ec7454bda6af340f547116f2a4bda855" }
 dlimp = { git = "https://github.com/kvablack/dlimp", rev = "ad72ce3a9b414db2185bc0b38461d4101a65477a" }
 
 [tool.uv.workspace]
