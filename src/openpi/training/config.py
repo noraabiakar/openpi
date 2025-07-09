@@ -588,7 +588,7 @@ _CONFIGS = [
         data=LeRobotV2DataConfig(
             base_config=DataConfig(prompt_from_task=True),
         ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_fast_base/params"),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
         num_train_steps=30_000,
     ),
     #
